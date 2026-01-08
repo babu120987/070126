@@ -6,17 +6,29 @@ pipeline {
         }
     }
 
+    options {
+        skipDefaultCheckout(true) // skip automatic checkout
+    }
+
     stages {
+
+        stage('Clean Workspace') {
+            steps {
+                echo "Cleaning workspace..."
+                deleteDir()  // deletes all files in the workspace safely
+            }
+        }
 
         stage('Checkout') {
             steps {
-                sh 'echo passed'
+                git branch: 'master',
+                    url: 'https://github.com/babu120987/070126.git',
+                    credentialsId: '' // leave blank if public repo
             }
         }
 
         stage('Build') {
             steps {
-                sh 'ls -ltr'
                 sh 'mvn clean package'
             }
         }
@@ -29,7 +41,7 @@ pipeline {
 
         stage('Static Code Analysis') {
             environment {
-                SONAR_URL = "http://localhost:9000" // your actual SonarQube URL
+                SONAR_URL = "http://your-sonar-server:9000"
             }
             steps {
                 withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
