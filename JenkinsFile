@@ -1,18 +1,48 @@
 pipeline {
-    agent {
-        docker {
-            image 'abhishekf5/maven-abhishek-docker-agent:v1'
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    agent any
+
+    options {
+        skipDefaultCheckout(true) // prevent automatic checkout before we clean
     }
 
     stages {
-        stage('Test Docker Agent') {
+        stage('Clean Workspace') {
             steps {
-                sh 'whoami'
-                sh 'java -version'
-                sh 'mvn -v'
+                // Use 'cleanWs' plugin if available (safer)
+                cleanWs() 
+                
+                // OR use shell cleanup if you really want everything gone
+                // sh 'rm -rf * .git'
             }
+        }
+
+        stage('Checkout') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/babu120987/070126.git',
+                    credentialsId: '' // leave blank if public repo
+            }
+        }
+
+        // Add other stages below
+        stage('Build') {
+            steps {
+                echo "Building..."
+                // your build steps
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+                // your test steps
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
         }
     }
 }
