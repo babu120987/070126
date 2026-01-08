@@ -6,6 +6,37 @@ pipeline {
     }
   }
 
+  options {
+    skipDefaultCheckout(true)   // prevent automatic checkout before we clean
+  }
+
+  stages {
+    stage('Clean Workspace') {
+      steps {
+        sh 'rm -rf * .git'  // dangerous but clears everything in the workspace
+      }
+    }
+
+    stage('Checkout') {
+      steps {
+        git branch: 'master',
+            url: 'https://github.com/babu120987/070126.git',
+            credentialsId: '' // leave blank if public repo
+      }
+    }
+
+    // ... rest of your stages
+  }
+}
+
+pipeline {
+  agent {
+    docker {
+      image 'abhishekf5/maven-abhishek-docker-agent:v1'
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
+
   stages {
 
     stage('Checkout') {
