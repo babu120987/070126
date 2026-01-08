@@ -1,32 +1,41 @@
 pipeline {
-    agent {
-        docker {
-            image 'abhishekf5/maven-abhishek-docker-agent:v1'
-            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    agent any
+
+    options {
+        skipDefaultCheckout(true) // prevent automatic checkout before we clean
     }
 
     stages {
-
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                sh 'echo passed'
-                // Replace this with your actual git checkout if needed
-                // git branch: 'master', url: 'https://github.com/your-repo.git'
+                // Use 'cleanWs' plugin if available (safer)
+                cleanWs() 
+                
+                // OR use shell cleanup if you really want everything gone
+                // sh 'rm -rf * .git'
             }
         }
 
+        stage('Checkout') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/babu120987/070126.git',
+                    credentialsId: '' // leave blank if public repo
+            }
+        }
+
+        // Add other stages below
         stage('Build') {
             steps {
-                sh 'ls -ltr'
-                sh 'mvn clean package'  // compiles and packages your app
+                echo "Building..."
+                // your build steps
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running Maven Tests...'
-                sh 'mvn test'  // explicitly run tests
+                echo "Running tests..."
+                // your test steps
             }
         }
     }
@@ -34,12 +43,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-        }
-        success {
-            echo 'Build and Tests passed!'
-        }
-        failure {
-            echo 'Build or Tests failed!'
         }
     }
 }
