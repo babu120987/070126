@@ -11,35 +11,35 @@ pipeline {
         stage('Checkout') {
             steps {
                 sh 'echo passed'
-                // Replace this with your actual git checkout if needed
-                // git branch: 'master', url: 'https://github.com/your-repo.git'
             }
         }
 
         stage('Build') {
             steps {
                 sh 'ls -ltr'
-                sh 'mvn clean package'  // compiles and packages your app
+                sh 'mvn clean package'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running Maven Tests...'
-                sh 'mvn test'  // explicitly run tests
+                sh 'mvn test'
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Pipeline finished.'
-        }
-        success {
-            echo 'Build and Tests passed!'
-        }
-        failure {
-            echo 'Build or Tests failed!'
+        stage('Static Code Analysis') {
+            environment {
+                SONAR_URL = "http://localhost:9000" // your actual SonarQube URL
+            }
+            steps {
+                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                    sh """
+                        mvn sonar:sonar \
+                        -Dsonar.login=$SONAR_AUTH_TOKEN \
+                        -Dsonar.host.url=$SONAR_URL
+                    """
+                }
+            }
         }
     }
 }
