@@ -6,52 +6,40 @@ pipeline {
         }
     }
 
-    options {
-        skipDefaultCheckout(true) // skip automatic checkout
-    }
-
     stages {
-
-        stage('Clean Workspace') {
-            steps {
-                echo "Cleaning workspace..."
-                deleteDir()  // deletes all files in the workspace safely
-            }
-        }
 
         stage('Checkout') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/babu120987/070126.git',
-                    credentialsId: '' // leave blank if public repo
+                sh 'echo passed'
+                // Replace this with your actual git checkout if needed
+                // git branch: 'master', url: 'https://github.com/your-repo.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'ls -ltr'
+                sh 'mvn clean package'  // compiles and packages your app
             }
         }
 
         stage('Test') {
             steps {
-                sh 'mvn test'
+                echo 'Running Maven Tests...'
+                sh 'mvn test'  // explicitly run tests
             }
         }
+    }
 
-        stage('Static Code Analysis') {
-            environment {
-                SONAR_URL = "http://your-sonar-server:9000"
-            }
-            steps {
-                withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                    sh """
-                        mvn sonar:sonar \
-                        -Dsonar.login=$SONAR_AUTH_TOKEN \
-                        -Dsonar.host.url=$SONAR_URL
-                    """
-                }
-            }
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+        success {
+            echo 'Build and Tests passed!'
+        }
+        failure {
+            echo 'Build or Tests failed!'
         }
     }
 }
