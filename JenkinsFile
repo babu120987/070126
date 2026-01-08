@@ -43,3 +43,9 @@ pipeline {
         }
     }
 }
+stage('Clean Workspace') {
+    steps {
+        echo "Cleaning workspace..."
+        sh 'rm -rf * .??*' // removes all files including hidden ones
+    }
+}
